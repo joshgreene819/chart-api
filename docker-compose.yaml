@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  chart_api:
+    build: .
+    ports:
+      - "8080:8080"
+  mongoDB:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
