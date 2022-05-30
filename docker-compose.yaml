@@ -1,12 +1,14 @@
 version: "3.9"
 services:
-  chart_api:
+  app:
     build: .
     ports:
       - "8080:8080"
-  mongoDB:
+  db:
     image: mongo
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    ports:
+      - "27017:27017"

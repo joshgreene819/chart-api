@@ -1,10 +1,18 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joshgreene819/chart-api/resources"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
@@ -33,24 +41,22 @@ func main() {
 	router.Run()
 }
 
-/* Test connecting to MongoDB container */
-// func tempMain() {
-// 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongodb0.example.com:27017"))
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+func connectMongoDB() {
+	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGO_URI")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Disconnect(ctx)
 
-// 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-// 	err = client.Connect(ctx)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer client.Disconnect(ctx)
-
-// 	// List databases
-// 	databases, err := client.ListDatabaseNames(ctx, bson.M{})
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	fmt.Println(databases)
-// }
+	// List databases
+	databases, err := client.ListDatabaseNames(ctx, bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(databases)
+}
