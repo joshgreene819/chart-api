@@ -17,11 +17,12 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-# Go workspace file
+# Workspace config
 go.work
+.vscode
+
+# Context file for confidential environment variables
+context.sh
 
 # Sample json files for interacting with the api locally
 example*.json
-
-# Text-editor config
-.vscode
