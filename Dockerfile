@@ -13,8 +13,4 @@ RUN go build -o ./chart-api
 
 EXPOSE 8080
 
-# Want to move this to docker-compose.yaml eventually. More sensible since referencing the 'db'
-# service name
-ENV MONGO_URI="mongodb://db:27107" 
-
-ENTRYPOINT [ "./chart-api" ]
+CMD [ "./chart-api" ]

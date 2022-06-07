@@ -6,11 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joshgreene819/chart-api/resources"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -42,21 +40,22 @@ func main() {
 }
 
 func connectMongoDB() {
-	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGO_URI")))
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Disconnect(ctx)
+	// Set client options
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_DB_URI"))
 
-	// List databases
-	databases, err := client.ListDatabaseNames(ctx, bson.M{})
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(databases)
+
+	// Check the connection
+	err = client.Ping(context.TODO(), nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Connected to MongoDB!")
 }
