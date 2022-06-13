@@ -7,10 +7,10 @@ import (
 )
 
 type Dataset struct {
-	ID             uint                   `json:"id" gorm:"primary_key"`
-	Title          string                 `json:"title"`
-	ParentTemplate int                    `json:"parentTemplate"`
-	Data           map[string]interface{} `json:"data"`
+	ID             uint                   `json:"id" gorm:"primary_key" bson:"id"`
+	Title          string                 `json:"title" bson:"title"`
+	ParentTemplate int                    `json:"parentTemplate" bson:"parentTemplate,omitempty"`
+	Data           map[string]interface{} `json:"data" bson:"data"`
 }
 
 // User-submitted dataset info (without ID)

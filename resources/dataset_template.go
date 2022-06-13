@@ -7,10 +7,10 @@ import (
 )
 
 type DatasetTemplate struct {
-	ID             uint                   `json:"id" gorm:"primary_key"`
-	Title          string                 `json:"title"`
-	AssignDefaults bool                   `json:"assignDefaults"`
-	RequiredKeys   map[string]interface{} `json:"requiredKeys"`
+	ID             uint                   `json:"id" gorm:"primary_key" bson:"id"`
+	Title          string                 `json:"title" bson:"title"`
+	AssignDefaults bool                   `json:"assignDefaults" bson:"assignDefaults"`
+	RequiredKeys   map[string]interface{} `json:"requiredKeys" bson:"requiredKeys"`
 }
 
 type DatasetTemplateInput struct {
