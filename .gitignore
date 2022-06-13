@@ -26,6 +26,7 @@ go.work
 
 # Context file for confidential environment variables
 context.sh
+.env
 
 # Sample json files for interacting with the api locally
 example*.json

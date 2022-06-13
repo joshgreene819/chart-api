@@ -1,17 +1,16 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joshgreene819/chart-api/configs"
 	"github.com/joshgreene819/chart-api/resources"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var appConfiguration *configs.Configuration = configs.LoadConfiguration()
+var dbClient *mongo.Client = configs.ConnectDB(appConfiguration.MongoURI)
 
 func main() {
 	router := gin.Default()
@@ -37,25 +36,4 @@ func main() {
 	// ...
 
 	router.Run()
-}
-
-func connectMongoDB() {
-	// Set client options
-	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_DB_URI"))
-
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Check the connection
-	err = client.Ping(context.TODO(), nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Connected to MongoDB!")
 }

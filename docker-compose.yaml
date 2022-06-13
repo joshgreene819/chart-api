@@ -1,12 +1,7 @@
 version: "3.9"
 services:
-  app:
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      - MONGO_DB_URI='mongodb://localhost:27017'
   db:
+    container_name: mongodb
     image: mongo
     restart: always
     environment:
@@ -14,3 +9,11 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "27017:27017"
+
+  # app:
+  #   container_name: chart-api
+  #   build: .
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - MONGO_DB_URI='mongodb://localhost:27017'
