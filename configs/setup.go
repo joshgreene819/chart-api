@@ -9,7 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ConnectDB(uri string) *mongo.Client {
+func ClientConnectDB() *mongo.Client {
+	uri := LoadConfiguration().MongoURI
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal(err)
@@ -21,11 +22,19 @@ func ConnectDB(uri string) *mongo.Client {
 		log.Fatal(err)
 	}
 
-	// ping the database
+	// Ping the database
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Connected to MongoDB")
 	return client
+}
+
+var DB *mongo.Client = ClientConnectDB()
+
+// Get database collections
+func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	collection := client.Database("FOO").Collection(collectionName)
+	return collection
 }

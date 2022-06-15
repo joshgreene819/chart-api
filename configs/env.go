@@ -7,15 +7,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Configuration struct {
+type EnvConfiguration struct {
 	MongoURI string
 }
 
-func LoadConfiguration() *Configuration {
+func LoadConfiguration() *EnvConfiguration {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
-	return &Configuration{MongoURI: os.Getenv("MONGO_URI")}
+	return &EnvConfiguration{MongoURI: os.Getenv("MONGO_URI")}
 }
