@@ -19,6 +19,7 @@ func main() {
 
 	// Implemented routes
 	app.Post("/datasetTemplate", controllers.CreateDatasetTemplate)
+	app.Get("/datasetTemplate", controllers.GetAllDatasetTemplates)
 	app.Get("/datasetTemplate/:id", controllers.GetDatasetTemplate)
 	app.Put("/datasetTemplate/:id", controllers.EditDatasetTemplate)
 	app.Delete("/datasetTemplate/:id", controllers.DeleteDatasetTemplate)
