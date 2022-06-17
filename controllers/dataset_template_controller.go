@@ -47,7 +47,7 @@ func CreateDatasetTemplate(c *fiber.Ctx) error {
 		RequiredKeys:   datasetTemplate.RequiredKeys,
 	}
 
-	result, err := datasetTemplateCollection.InsertOne(ctx, newDatasetTemplate)
+	_, err := datasetTemplateCollection.InsertOne(ctx, newDatasetTemplate)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.DatasetTemplateResponse{
 			Status:   http.StatusInternalServerError,
@@ -60,7 +60,7 @@ func CreateDatasetTemplate(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(responses.DatasetTemplateResponse{
 		Status:   http.StatusCreated,
 		Message:  "success",
-		Response: &fiber.Map{"data": result},
+		Response: &fiber.Map{"id": newDatasetTemplate.ID},
 	})
 }
 
