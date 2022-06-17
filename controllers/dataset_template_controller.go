@@ -25,7 +25,7 @@ func CreateDatasetTemplate(c *fiber.Ctx) error {
 
 	// Validate request body
 	if err := c.BodyParser(&datasetTemplate); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusBadRequest).JSON(responses.RequestResponse{
 			Status:   http.StatusBadRequest,
 			Message:  "error",
 			Response: &fiber.Map{"data": err.Error()},
@@ -33,7 +33,7 @@ func CreateDatasetTemplate(c *fiber.Ctx) error {
 	}
 
 	if validationErr := validate.Struct(&datasetTemplate); validationErr != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusBadRequest).JSON(responses.RequestResponse{
 			Status:   http.StatusBadRequest,
 			Message:  "error",
 			Response: &fiber.Map{"data": validationErr.Error()},
@@ -49,7 +49,7 @@ func CreateDatasetTemplate(c *fiber.Ctx) error {
 
 	_, err := datasetTemplateCollection.InsertOne(ctx, newDatasetTemplate)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusInternalServerError).JSON(responses.RequestResponse{
 			Status:   http.StatusInternalServerError,
 			Message:  "error",
 			Response: &fiber.Map{"data": err.Error()},
@@ -57,7 +57,7 @@ func CreateDatasetTemplate(c *fiber.Ctx) error {
 	}
 
 	// Success
-	return c.Status(http.StatusCreated).JSON(responses.DatasetTemplateResponse{
+	return c.Status(http.StatusCreated).JSON(responses.RequestResponse{
 		Status:   http.StatusCreated,
 		Message:  "success",
 		Response: &fiber.Map{"id": newDatasetTemplate.ID},
@@ -73,14 +73,14 @@ func GetDatasetTemplate(c *fiber.Ctx) error {
 	objectID, _ := primitive.ObjectIDFromHex(id)
 	err := datasetTemplateCollection.FindOne(ctx, bson.M{"id": objectID}).Decode(&datasetTemplate)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusInternalServerError).JSON(responses.RequestResponse{
 			Status:   http.StatusInternalServerError,
 			Message:  "error",
 			Response: &fiber.Map{"data": err.Error()},
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.DatasetTemplateResponse{
+	return c.Status(http.StatusOK).JSON(responses.RequestResponse{
 		Status:   http.StatusOK,
 		Message:  "success",
 		Response: &fiber.Map{"data": datasetTemplate},
@@ -94,7 +94,7 @@ func GetAllDatasetTemplates(c *fiber.Ctx) error {
 
 	results, err := datasetTemplateCollection.Find(ctx, bson.M{})
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusInternalServerError).JSON(responses.RequestResponse{
 			Status:   http.StatusInternalServerError,
 			Message:  "error",
 			Response: &fiber.Map{"data": err.Error()},
@@ -105,7 +105,7 @@ func GetAllDatasetTemplates(c *fiber.Ctx) error {
 	for results.Next(ctx) {
 		var singleDatasetTemplate models.DatasetTemplate
 		if err = results.Decode(&singleDatasetTemplate); err != nil {
-			c.Status(http.StatusInternalServerError).JSON(responses.DatasetTemplateResponse{
+			c.Status(http.StatusInternalServerError).JSON(responses.RequestResponse{
 				Status:   http.StatusInternalServerError,
 				Message:  "error",
 				Response: &fiber.Map{"data": err.Error()},
@@ -114,7 +114,7 @@ func GetAllDatasetTemplates(c *fiber.Ctx) error {
 		datasetTemplates = append(datasetTemplates, singleDatasetTemplate)
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.DatasetTemplateResponse{
+	return c.Status(http.StatusOK).JSON(responses.RequestResponse{
 		Status:   http.StatusOK,
 		Message:  "success",
 		Response: &fiber.Map{"data": datasetTemplates},
@@ -131,7 +131,7 @@ func EditDatasetTemplate(c *fiber.Ctx) error {
 
 	// validate the request body
 	if err := c.BodyParser(&datasetTemplate); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusBadRequest).JSON(responses.RequestResponse{
 			Status:   http.StatusBadRequest,
 			Message:  "error",
 			Response: &fiber.Map{"data": err.Error()},
@@ -140,7 +140,7 @@ func EditDatasetTemplate(c *fiber.Ctx) error {
 
 	// validator library to test required fields
 	if validationErr := validate.Struct(&datasetTemplate); validationErr != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusBadRequest).JSON(responses.RequestResponse{
 			Status:   http.StatusBadRequest,
 			Message:  "error",
 			Response: &fiber.Map{"data": validationErr.Error()},
@@ -154,7 +154,7 @@ func EditDatasetTemplate(c *fiber.Ctx) error {
 	}
 	result, err := datasetTemplateCollection.UpdateOne(ctx, bson.M{"id": objectID}, bson.M{"$set": update})
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusInternalServerError).JSON(responses.RequestResponse{
 			Status:   http.StatusInternalServerError,
 			Message:  "error",
 			Response: &fiber.Map{"data": err.Error()},
@@ -166,7 +166,7 @@ func EditDatasetTemplate(c *fiber.Ctx) error {
 	if result.MatchedCount == 1 {
 		err := datasetTemplateCollection.FindOne(ctx, bson.M{"id": objectID}).Decode(&updatedDatasetTemplate)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(responses.DatasetTemplateResponse{
+			return c.Status(http.StatusInternalServerError).JSON(responses.RequestResponse{
 				Status:   http.StatusInternalServerError,
 				Message:  "error",
 				Response: &fiber.Map{"data": err.Error()},
@@ -174,7 +174,7 @@ func EditDatasetTemplate(c *fiber.Ctx) error {
 		}
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.DatasetTemplateResponse{
+	return c.Status(http.StatusOK).JSON(responses.RequestResponse{
 		Status:   http.StatusOK,
 		Message:  "success",
 		Response: &fiber.Map{"data": updatedDatasetTemplate},
@@ -190,7 +190,7 @@ func DeleteDatasetTemplate(c *fiber.Ctx) error {
 
 	result, err := datasetTemplateCollection.DeleteOne(ctx, bson.M{"id": objectID})
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusInternalServerError).JSON(responses.RequestResponse{
 			Status:   http.StatusInternalServerError,
 			Message:  "error",
 			Response: &fiber.Map{"data": err.Error()},
@@ -198,14 +198,14 @@ func DeleteDatasetTemplate(c *fiber.Ctx) error {
 	}
 
 	if result.DeletedCount < 1 {
-		return c.Status(http.StatusNotFound).JSON(responses.DatasetTemplateResponse{
+		return c.Status(http.StatusNotFound).JSON(responses.RequestResponse{
 			Status:   http.StatusNotFound,
 			Message:  "error",
 			Response: &fiber.Map{"data": "Dataset Template with specified ID not found."},
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.DatasetTemplateResponse{
+	return c.Status(http.StatusOK).JSON(responses.RequestResponse{
 		Status:   http.StatusOK,
 		Message:  "success",
 		Response: &fiber.Map{"data": "Dataset Template successfully deleted."},
