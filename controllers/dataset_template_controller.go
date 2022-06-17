@@ -5,18 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joshgreene819/chart-api/configs"
 	"github.com/joshgreene819/chart-api/models"
 	"github.com/joshgreene819/chart-api/responses"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
-
-var datasetTemplateCollection *mongo.Collection = configs.GetCollection(configs.DB, "dataset_templates")
-var validate = validator.New()
 
 func CreateDatasetTemplate(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

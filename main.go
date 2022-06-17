@@ -17,12 +17,15 @@ func main() {
 		return c.JSON(&fiber.Map{"data": "Hello world! (from Fiber & MongoDB)"})
 	})
 
-	// Implemented routes
+	// DatasetTemplate routes
 	app.Post("/datasetTemplate", controllers.CreateDatasetTemplate)
 	app.Get("/datasetTemplate", controllers.GetAllDatasetTemplates)
 	app.Get("/datasetTemplate/:id", controllers.GetDatasetTemplate)
 	app.Put("/datasetTemplate/:id", controllers.EditDatasetTemplate)
 	app.Delete("/datasetTemplate/:id", controllers.DeleteDatasetTemplate)
+
+	// Dataset routes
+	app.Post("/dataset", controllers.CreateDataset)
 
 	app.Listen(":8080")
 }
