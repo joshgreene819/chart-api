@@ -33,7 +33,7 @@ func CreateDataset(c *fiber.Ctx) error {
 		})
 	}
 
-	if complianceErr := validate.Struct(&dataset); complianceErr != nil {
+	if complianceErr := makeCompliantDataset(c, &dataset); complianceErr != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.RequestResponse{
 			Status:   http.StatusBadRequest,
 			Message:  "error",
@@ -65,20 +65,17 @@ func CreateDataset(c *fiber.Ctx) error {
 	})
 }
 
-func makeCompliantDataset(d *models.Dataset) error {
+func makeCompliantDataset(c *fiber.Ctx, d *models.Dataset) error {
 	/*
-		This helper function has to...
-			> Verify that every entry in d.ParentTemplates slice is a valid template
-				* Fail if any of them aren't valid
-				* CAN succeed if len(d.ParentTemplates) == 0
-			> For each template in d.ParentTemplates...
-				* d must have all of the template's required keys
-					- if not AND template has AssignDefaults: true - assign the default (first come first
-						serve basis, no overwriting with another templates defaults)
-					- if not AND template has AssignDefaults: false - keep going under the assumption that
-						a template not yet processed with have the key and AssignDefaults: true. If the end
-						has been reached and the required key has not been assigned through defaults, fail
-						with error
+		> Verify that every entry in d.ParentTemplates slice is a valid template
+		    * Fail if any of them aren't valid
+			* CAN succeed if len(d.ParentTemplates) == 0
+		> For each template in d.ParentTemplates...
+		  * check template's AnyDepthKeys...
+		    - Do a nested search for compliant keys
+			- Will get a little bit messy with AnyDepth slices and/or maps
+		  * check template's StrictDepthKeys...
+		    - Directly access each key in the StrictDepth entries
 	*/
 	return nil
 }

@@ -35,10 +35,10 @@ func CreateDatasetTemplate(c *fiber.Ctx) error {
 	}
 
 	newDatasetTemplate := models.DatasetTemplate{
-		ID:             primitive.NewObjectID(),
-		Title:          datasetTemplate.Title,
-		AssignDefaults: datasetTemplate.AssignDefaults,
-		RequiredKeys:   datasetTemplate.RequiredKeys,
+		ID:           primitive.NewObjectID(),
+		Title:        datasetTemplate.Title,
+		Options:      datasetTemplate.Options,
+		RequiredKeys: datasetTemplate.RequiredKeys,
 	}
 
 	_, err := datasetTemplateCollection.InsertOne(ctx, newDatasetTemplate)
@@ -142,9 +142,9 @@ func EditDatasetTemplate(c *fiber.Ctx) error {
 	}
 
 	update := bson.M{
-		"title":          datasetTemplate.Title,
-		"assignDefaults": datasetTemplate.AssignDefaults,
-		"requiredKeys":   datasetTemplate.RequiredKeys,
+		"title":        datasetTemplate.Title,
+		"options":      datasetTemplate.Options,
+		"requiredKeys": datasetTemplate.RequiredKeys,
 	}
 	result, err := datasetTemplateCollection.UpdateOne(ctx, bson.M{"id": objectID}, bson.M{"$set": update})
 	if err != nil {
@@ -204,4 +204,25 @@ func DeleteDatasetTemplate(c *fiber.Ctx) error {
 		Message:  "success",
 		Response: &fiber.Map{"data": "Dataset Template successfully deleted."},
 	})
+}
+
+func getDatasetTemplates(c *fiber.Ctx, datasetTemplateIDs []primitive.ObjectID) ([]models.DatasetTemplate, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var templates []models.DatasetTemplate
+	defer cancel()
+
+	cursor, err := datasetTemplateCollection.Find(ctx, bson.M{"$in": datasetTemplateIDs})
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		var currentTemplate models.DatasetTemplate
+		if err = cursor.Decode(&currentTemplate); err != nil {
+			return templates, err
+		}
+		templates = append(templates, currentTemplate)
+	}
+	return templates, nil
 }
