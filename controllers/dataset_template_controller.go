@@ -37,8 +37,8 @@ func CreateDatasetTemplate(c *fiber.Ctx) error {
 	newDatasetTemplate := models.DatasetTemplate{
 		ID:           primitive.NewObjectID(),
 		Title:        datasetTemplate.Title,
-		Options:      datasetTemplate.Options,
-		RequiredKeys: datasetTemplate.RequiredKeys,
+		OneTimeData:  datasetTemplate.OneTimeData,
+		IteratedData: datasetTemplate.IteratedData,
 	}
 
 	_, err := datasetTemplateCollection.InsertOne(ctx, newDatasetTemplate)
@@ -143,8 +143,8 @@ func EditDatasetTemplate(c *fiber.Ctx) error {
 
 	update := bson.M{
 		"title":        datasetTemplate.Title,
-		"options":      datasetTemplate.Options,
-		"requiredKeys": datasetTemplate.RequiredKeys,
+		"oneTimeData":  datasetTemplate.OneTimeData,
+		"iteratedData": datasetTemplate.IteratedData,
 	}
 	result, err := datasetTemplateCollection.UpdateOne(ctx, bson.M{"id": objectID}, bson.M{"$set": update})
 	if err != nil {

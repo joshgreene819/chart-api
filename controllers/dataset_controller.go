@@ -66,16 +66,5 @@ func CreateDataset(c *fiber.Ctx) error {
 }
 
 func makeCompliantDataset(c *fiber.Ctx, d *models.Dataset) error {
-	/*
-		> Verify that every entry in d.ParentTemplates slice is a valid template
-		    * Fail if any of them aren't valid
-			* CAN succeed if len(d.ParentTemplates) == 0
-		> For each template in d.ParentTemplates...
-		  * check template's AnyDepthKeys...
-		    - Do a nested search for compliant keys
-			- Will get a little bit messy with AnyDepth slices and/or maps
-		  * check template's StrictDepthKeys...
-		    - Directly access each key in the StrictDepth entries
-	*/
 	return nil
 }
