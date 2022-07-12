@@ -82,76 +82,66 @@ func makeCompliantDataset(c *fiber.Ctx, d *models.Dataset) error {
 		if err != nil {
 			return err
 		}
-
-		// check one time data
-		if !(parent.OneTimeData.Metadata.AnyDepth) {
-			for k, v := range parent.OneTimeData.Data {
-				if _, ok := d.Data[k]; !ok {
-					// doesn't exist
-					if parent.OneTimeData.Metadata.AssignDefaults {
-						d.Data[k] = v
-					} else {
-						return errors.New("TBD")
-					}
-				}
-			}
-			// do some direct accessing
-			// for each key in parent.OneTimeData.Data ...
-			//		d[key] -> should exist, be the same type
-		}
-
-		// check iterated data
-		if !(parent.IteratedData.Metadata.AnyDepth) {
-
-		}
 	}
-
 	return nil
 }
 
 func complyWithParent(d *models.Dataset, parent models.DatasetTemplate) error {
-	// I hope you turn out recursive
-	if !(parent.OneTimeData.Metadata.AnyDepth) {
-		for parentKey, parentValue := range parent.OneTimeData.Data {
+	for key, parentValue := range parent.OneTimeData.Data {
+		if !(parent.OneTimeData.Metadata.AnyDepth) {
 			switch parentValueType := parentValue.(type) {
 			case nil:
-				// null type in parent key means that dataset can have whatever kind of data
-				continue
+				if _, ok := d.Data[key]; !ok {
+					if parent.OneTimeData.Metadata.AssignDefaults {
+						d.Data[key] = parentValue
+					} else {
+						msg := fmt.Sprintf("dataset does not contain key '%s' and parent template %s (%s) does not assign default values", key, parent.Title, parent.ID.String())
+						return errors.New(msg)
+					}
+				}
+				// TEMPORARY Just to suppress error
+				fmt.Println(parentValueType)
 
 			case map[string]interface{}:
-				// Make dynamnic strict from v and try and marshal d.Data[k] into v's struct
-				// for k, v in parentValue 
-				//   DynamicStruct.add(k, v)
-				// DynamicStruct.build().new()
-				// unmarshal d.Data[parentKey] if it exists
+				// object
 				continue
 
 			case []interface{}:
+				// list
 				continue
 
 			default:
-				// direct comparison
-				if _, ok := d.Data[parentKey]; !ok {
+				// primitive type
+				datasetValue, ok := d.Data[key]
+				if !ok {
 					if parent.OneTimeData.Metadata.AssignDefaults {
-						d.Data[parentKey] = parentValue
+						d.Data[key] = parentValue
 					} else {
-						msg := fmt.Sprintf("dataset does not contain required key: '%s' in top-level of data", parentKey)
-						errors.New(msg)
+						msg := fmt.Sprintf("dataset does not contain key '%s' and parent template %s (%s) does not assign default values", key, parent.Title, parent.ID.String())
+						return errors.New(msg)
 					}
 				} else {
-					if reflect.TypeOf(parentValue) != reflect.TypeOf(d.Data[parentKey]) {
+					if reflect.TypeOf(datasetValue) != reflect.TypeOf(parentValue) {
 						if parent.OneTimeData.Metadata.AssignDefaults {
-							d.Data[parentKey] = parentValue
+							d.Data[key] = parentValue
 						} else {
-							msg := fmt.Sprintf("dataset contains key: '%s' but with an incorrect type. Dataset template (%v) has key of type %T while dataset has key of type %T",
-								parentKey, d.ID, parentValue, d.Data[parentKey])
-							errors.New(msg)
+							msg := fmt.Sprintf("key '%s' in dataset but has a different type than the data in parent template '%s' (%s)\ndataset: %v\tparent template: %v", key, parent.Title, parent.ID.String(), reflect.TypeOf(datasetValue).String(), reflect.TypeOf(parentValue).String())
+							return errors.New(msg)
 						}
 					}
 				}
 			}
+		} else {
+			// nested stuff
+			// ...
+		}
+		if !(parent.IteratedData.Metadata.AnyDepth) {
+			// direct checks for each entry in the list
+			// ...
+		} else {
+			// nested stuff
+			// ...
 		}
 	}
-
 	return nil
 }
