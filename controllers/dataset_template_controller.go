@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joshgreene819/chart-api/models"
 	"github.com/joshgreene819/chart-api/responses"
+	"github.com/xeipuuv/gojsonschema"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -34,11 +35,20 @@ func CreateDatasetTemplate(c *fiber.Ctx) error {
 		})
 	}
 
+	sl := gojsonschema.NewSchemaLoader()
+	sl.Validate = true
+	if schemaErr := sl.AddSchemas(gojsonschema.NewGoLoader(&datasetTemplate.Schema)); schemaErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.RequestResponse{
+			Status:   http.StatusBadRequest,
+			Message:  "error",
+			Response: &fiber.Map{"data": schemaErr.Error()},
+		})
+	}
+
 	newDatasetTemplate := models.DatasetTemplate{
-		ID:           primitive.NewObjectID(),
-		Title:        datasetTemplate.Title,
-		OneTimeData:  datasetTemplate.OneTimeData,
-		IteratedData: datasetTemplate.IteratedData,
+		ID:     primitive.NewObjectID(),
+		Title:  datasetTemplate.Title,
+		Schema: datasetTemplate.Schema,
 	}
 
 	_, err := datasetTemplateCollection.InsertOne(ctx, newDatasetTemplate)
@@ -141,10 +151,20 @@ func EditDatasetTemplate(c *fiber.Ctx) error {
 		})
 	}
 
+	// validate schema
+	sl := gojsonschema.NewSchemaLoader()
+	sl.Validate = true
+	if schemaErr := sl.AddSchemas(gojsonschema.NewGoLoader(&datasetTemplate.Schema)); schemaErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.RequestResponse{
+			Status:   http.StatusBadRequest,
+			Message:  "error",
+			Response: &fiber.Map{"data": schemaErr.Error()},
+		})
+	}
+
 	update := bson.M{
-		"title":        datasetTemplate.Title,
-		"oneTimeData":  datasetTemplate.OneTimeData,
-		"iteratedData": datasetTemplate.IteratedData,
+		"title":  datasetTemplate.Title,
+		"schema": datasetTemplate.Schema,
 	}
 	result, err := datasetTemplateCollection.UpdateOne(ctx, bson.M{"id": objectID}, bson.M{"$set": update})
 	if err != nil {

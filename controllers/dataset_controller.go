@@ -1,16 +1,17 @@
 package controllers
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joshgreene819/chart-api/models"
 	"github.com/joshgreene819/chart-api/responses"
+	"github.com/xeipuuv/gojsonschema"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -77,71 +78,29 @@ func makeCompliantDataset(c *fiber.Ctx, d *models.Dataset) error {
 		return err
 	}
 
+	var response bytes.Buffer
+	documentLoader := gojsonschema.NewGoLoader(d.Data)
 	for _, parent := range pulledParentTemplates {
-		err := complyWithParent(d, parent)
+		// json-schema validation
+		schemaLoader := gojsonschema.NewGoLoader(parent.Schema)
+		result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 		if err != nil {
 			return err
 		}
-	}
-	return nil
-}
 
-func complyWithParent(d *models.Dataset, parent models.DatasetTemplate) error {
-	for key, parentValue := range parent.OneTimeData.Data {
-		if !(parent.OneTimeData.Metadata.AnyDepth) {
-			switch parentValueType := parentValue.(type) {
-			case nil:
-				if _, ok := d.Data[key]; !ok {
-					if parent.OneTimeData.Metadata.AssignDefaults {
-						d.Data[key] = parentValue
-					} else {
-						msg := fmt.Sprintf("dataset does not contain key '%s' and parent template %s (%s) does not assign default values", key, parent.Title, parent.ID.String())
-						return errors.New(msg)
-					}
-				}
-				// TEMPORARY Just to suppress error
-				fmt.Println(parentValueType)
-
-			case map[string]interface{}:
-				// object
-				continue
-
-			case []interface{}:
-				// list
-				continue
-
-			default:
-				// primitive type
-				datasetValue, ok := d.Data[key]
-				if !ok {
-					if parent.OneTimeData.Metadata.AssignDefaults {
-						d.Data[key] = parentValue
-					} else {
-						msg := fmt.Sprintf("dataset does not contain key '%s' and parent template %s (%s) does not assign default values", key, parent.Title, parent.ID.String())
-						return errors.New(msg)
-					}
-				} else {
-					if reflect.TypeOf(datasetValue) != reflect.TypeOf(parentValue) {
-						if parent.OneTimeData.Metadata.AssignDefaults {
-							d.Data[key] = parentValue
-						} else {
-							msg := fmt.Sprintf("key '%s' in dataset but has a different type than the data in parent template '%s' (%s)\ndataset: %v\tparent template: %v", key, parent.Title, parent.ID.String(), reflect.TypeOf(datasetValue).String(), reflect.TypeOf(parentValue).String())
-							return errors.New(msg)
-						}
-					}
-				}
+		if !(result.Valid()) {
+			errorEntry := fmt.Sprintf("The dataset does not comply with parent %s (%s)\n", parent.ID.String(), parent.Title)
+			response.WriteString(errorEntry)
+			for _, desc := range result.Errors() {
+				errorEntry = fmt.Sprintf("- %s\n", desc)
+				response.WriteString(errorEntry)
 			}
-		} else {
-			// nested stuff
-			// ...
 		}
-		if !(parent.IteratedData.Metadata.AnyDepth) {
-			// direct checks for each entry in the list
-			// ...
-		} else {
-			// nested stuff
-			// ...
-		}
+		response.WriteString("\n")
 	}
-	return nil
+	responseStr := response.String()
+	if len(responseStr) == 0 {
+		return nil
+	}
+	return errors.New(responseStr)
 }
