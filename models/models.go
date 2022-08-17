@@ -2,17 +2,17 @@ package models
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-// Definition of keys that a Dataset will need in order to comply with the
-// DatasetTemplate. Complying with a DatasetTemplate guarantees that queried
-// Datasets will have a certain set of keys and characteristics shared by other
-// Datasets that comply
+// Struct containing properties that compliant datasets will have. DatasetTemplate.Schema is simply
+// json schema unmarshaled into map[string]interface{}. A Dataset's compliance to a DatasetTemplate
+// is determined by validation via a json-schema library
 type DatasetTemplate struct {
 	ID     primitive.ObjectID     `json:"id,omitempty"`
 	Title  string                 `json:"title,omitempty" validate:"required"`
 	Schema map[string]interface{} `json:"schema,omitempty" validate:"required"`
 }
 
-// Arbitrary set of data used to build customizable Charts
+// Arbitrary set of data used to build customizable Charts. Expectations & restrictions can be set
+// by assigning a parent template via its ID to the Dataset instance
 type Dataset struct {
 	ID              primitive.ObjectID     `json:"id,omitempty"`
 	Title           string                 `json:"title,omitempty" validate:"required"`
