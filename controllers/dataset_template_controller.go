@@ -201,7 +201,6 @@ func DeleteDatasetTemplate(c *fiber.Ctx) error {
 	defer cancel()
 
 	objectID, _ := primitive.ObjectIDFromHex(id)
-
 	result, err := datasetTemplateCollection.DeleteOne(ctx, bson.M{"id": objectID})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.RequestResponse{
