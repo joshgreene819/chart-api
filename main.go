@@ -26,6 +26,10 @@ func main() {
 
 	// Dataset routes
 	app.Post("/dataset", controllers.CreateDataset)
+	app.Get("/dataset", controllers.GetAllDatasets)
+	app.Get("/dataset/:id", controllers.GetDataset)
+	app.Put("/dataset/:id", controllers.EditDataset)
+	app.Delete("/dataset/:id", controllers.DeleteDatasetTemplate)
 
 	app.Listen(":8080")
 }

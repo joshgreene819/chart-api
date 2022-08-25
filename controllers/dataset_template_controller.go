@@ -230,11 +230,15 @@ func getDatasetTemplates(c *fiber.Ctx, datasetTemplateIDs []primitive.ObjectID) 
 	var templates []models.DatasetTemplate
 	defer cancel()
 
-	cursor, err := datasetTemplateCollection.Find(ctx, bson.M{"$in": datasetTemplateIDs})
+	cursor, err := datasetTemplateCollection.Find(ctx, bson.M{"_id": bson.M{"$in": datasetTemplateIDs}})
 	if err != nil {
 		return nil, err
 	}
 
+	/*
+		ISSUE: this loop never yields any templates. All successful loops through the cursor return
+		the empty slice
+	*/
 	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
 		var currentTemplate models.DatasetTemplate
