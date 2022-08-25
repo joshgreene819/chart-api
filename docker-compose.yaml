@@ -5,8 +5,8 @@ services:
     image: mongo
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "27017:27017"
 
@@ -16,4 +16,4 @@ services:
   #   ports:
   #     - "8080:8080"
   #   environment:
-  #     - MONGO_DB_URI='mongodb://localhost:27017'
+  #     - MONGO_DB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@localhost:27017
