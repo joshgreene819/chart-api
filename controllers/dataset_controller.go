@@ -252,8 +252,8 @@ func makeCompliantDataset(c *fiber.Ctx, d *models.Dataset) error {
 				errorEntry = fmt.Sprintf("- %s\n", desc)
 				response.WriteString(errorEntry)
 			}
+			response.WriteString("\n")
 		}
-		response.WriteString("\n")
 	}
 	responseStr := response.String()
 	if len(responseStr) == 0 {

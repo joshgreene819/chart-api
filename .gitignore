@@ -28,5 +28,5 @@ go.work
 context.sh
 .env
 
-# Sample json files for interacting with the api locally
-example*.json
+# Sample input files for interacting with the API locally
+sample/
